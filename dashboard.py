@@ -171,9 +171,10 @@ time_filter = st.sidebar.radio(
 # Appliquer les filtres
 df_filtered = df_trades.copy()
 
-if 'timestamp_close' in df_filtered.columns:
+if not df_filtered.empty and 'timestamp_close' in df_filtered.columns:
     if time_filter == "Jour":
-        df_filtered = df_filtered[df_filtered['timestamp_close'].dt.date == datetime.now().date()]
+        today = datetime.now().date()
+        df_filtered = df_filtered[df_filtered['timestamp_close'].dt.date == today]
     elif time_filter == "Semaine":
         week_ago = datetime.now() - timedelta(days=7)
         df_filtered = df_filtered[df_filtered['timestamp_close'] >= week_ago]
@@ -191,6 +192,7 @@ if 'timestamp_close' in df_filtered.columns:
             (df_filtered['timestamp_close'].dt.date >= start_date) &
             (df_filtered['timestamp_close'].dt.date <= end_date)
         ]
+    # Si "Tout" est sélectionné, garder df_filtered = df_trades.copy() (pas de filtre)
 
 # --- Dashboard Principal ---
 st.title("📈 ROYCE ROLLS | DASHBOARD XAUUSD")
@@ -200,7 +202,7 @@ if len(df_filtered) == 0 and len(df_trades) > 0:
     st.warning(f"⚠️ Filtre actif: **{time_filter}** - Aucun trade trouvé pour cette période")
     
     # Afficher la période des données disponibles
-    if 'timestamp_close' in df_trades.columns:
+    if 'timestamp_close' in df_trades.columns and not df_trades.empty:
         min_date = df_trades['timestamp_close'].min()
         max_date = df_trades['timestamp_close'].max()
         st.info(f"📅 Données disponibles du {min_date.strftime('%Y-%m-%d')} au {max_date.strftime('%Y-%m-%d')}")
@@ -209,11 +211,25 @@ if len(df_filtered) == 0 and len(df_trades) > 0:
 # Métriques globales
 col1, col2, col3, col4 = st.columns(4)
 
-total_pnl = df_filtered['profit'].sum() if 'profit' in df_filtered.columns else 0
-total_trades = len(df_filtered)
-wins = len(df_filtered[df_filtered['result'] == 'WIN']) if 'result' in df_filtered.columns else 0
+# ✅ Calculer avec vérifications robustes
+if not df_filtered.empty and 'profit' in df_filtered.columns:
+    total_pnl = df_filtered['profit'].sum()
+else:
+    total_pnl = 0
+
+total_trades = len(df_filtered) if not df_filtered.empty else 0
+
+if not df_filtered.empty and 'result' in df_filtered.columns:
+    wins = len(df_filtered[df_filtered['result'] == 'WIN'])
+else:
+    wins = 0
+
 win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
-avg_profit = df_filtered[df_filtered['result'] == 'WIN']['profit'].mean() if wins > 0 else 0
+
+if not df_filtered.empty and 'profit' in df_filtered.columns and 'result' in df_filtered.columns and wins > 0:
+    avg_profit = df_filtered[df_filtered['result'] == 'WIN']['profit'].mean()
+else:
+    avg_profit = 0
 
 with col1:
     st.metric("💰 PNL Total", f"{total_pnl:.2f} €", 
