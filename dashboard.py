@@ -166,7 +166,7 @@ authenticator = stauth.Authenticate(
 )
 
 # --- Page de Login ---
-name, authentication_status, username = authenticator.login('Login', 'main')
+name, authentication_status, username = authenticator.login(location='main')
 
 if authentication_status == False:
     st.error('❌ Email/mot de passe incorrect')
@@ -292,7 +292,7 @@ elif authentication_status:
 
     # --- Barre Latérale pour Navigation ---
     st.sidebar.title(f"👤 {name}")
-    authenticator.logout('Logout', 'sidebar')
+    authenticator.logout(location='sidebar')
     st.sidebar.markdown("---")
     
     page = st.sidebar.radio(
