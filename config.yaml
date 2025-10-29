@@ -1,0 +1,20 @@
+credentials:
+  usernames:
+    admin:
+      email: jbquesnay@gmail.com
+      name: Jean-Baptiste Quesnay
+      password: $2b$12$KIXxPzQF7Jq3Z8.NZX9kzeYmVw7HQF5Kx3f9YQC.RqXm8Fz9XQW0O  # "admin123"
+    jbquesnay:
+      email: jbquesnay@gmail.com
+      name: Jean-Baptiste Quesnay
+      password: $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/lewmK2pIjz.kqKEf2  # "2ZZ9j$zp"
+
+cookie:
+  name: royce_rolls_dashboard
+  key: royce_rolls_secret_key_2024_secure_random_string
+  expiry_days: 30
+
+preauthorized:
+  emails:
+    - jbquesnay@gmail.com
+
