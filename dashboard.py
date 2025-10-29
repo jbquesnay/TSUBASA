@@ -166,13 +166,17 @@ authenticator = stauth.Authenticate(
 )
 
 # --- Page de Login ---
-name, authentication_status, username = authenticator.login(location='main')
+try:
+    authenticator.login(location='main')
+except Exception as e:
+    st.error(f"Erreur d'authentification: {e}")
 
-if authentication_status == False:
+# Vérifier le statut d'authentification
+if st.session_state.get("authentication_status") == False:
     st.error('❌ Email/mot de passe incorrect')
-elif authentication_status == None:
+elif st.session_state.get("authentication_status") == None:
     st.warning('⚠️ Veuillez entrer votre email et mot de passe')
-elif authentication_status:
+elif st.session_state.get("authentication_status"):
     # --- Initialisation des Données Cumulatives ---
     if "cumulative_data" not in st.session_state:
         st.session_state.cumulative_data = {
@@ -291,6 +295,7 @@ elif authentication_status:
     load_existing_data()
 
     # --- Barre Latérale pour Navigation ---
+    name = st.session_state.get("name", "Utilisateur")
     st.sidebar.title(f"👤 {name}")
     authenticator.logout(location='sidebar')
     st.sidebar.markdown("---")
