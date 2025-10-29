@@ -3,11 +3,11 @@ credentials:
     admin:
       email: jbquesnay@gmail.com
       name: Jean-Baptiste Quesnay
-      password: $2b$12$KIXxPzQF7Jq3Z8.NZX9kzeYmVw7HQF5Kx3f9YQC.RqXm8Fz9XQW0O  # "admin123"
+      password: $2b$12$.EOiu2qpB099PVJk0h1vyeyoFg11nwLFqLEGqI4DbawYXMfNJn.8e  # "admin123"
     jbquesnay:
       email: jbquesnay@gmail.com
       name: Jean-Baptiste Quesnay
-      password: $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/lewmK2pIjz.kqKEf2  # "2ZZ9j$zp"
+      password: $2b$12$vR5toz/cafGRV7sdK7vqcudMCOpHo7JfSkWy3zJnB6Aql3oAACZVG  # "2ZZ9j$zp"
 
 cookie:
   name: royce_rolls_dashboard
