@@ -82,19 +82,35 @@ def load_all_sessions():
             with open(session_file, 'r', encoding='utf-8') as f:
                 session_data = json.load(f)
                 
-                # Ajouter les trades
+                # Récupérer les trades de cette session
                 trades = session_data.get('trades', [])
+                
+                # Ajouter l'ID de session à chaque trade pour traçabilité
+                for trade in trades:
+                    trade['session_id'] = session_data.get('session_id')
+                    trade['session_date'] = session_data.get('date')
+                
                 all_trades.extend(trades)
                 
-                # Ajouter les infos de session
+                # ✅ RECALCULER les stats depuis les trades (pas depuis le JSON)
+                # pour garantir la cohérence des données
+                session_trades_pnl = sum(t.get('profit', 0) for t in trades)
+                session_wins = len([t for t in trades if t.get('result') == 'WIN'])
+                session_losses = len([t for t in trades if t.get('result') == 'LOSS'])
+                session_total = len(trades)
+                session_win_rate = (session_wins / session_total * 100) if session_total > 0 else 0
+                
+                # Ajouter les infos de session (recalculées)
                 sessions_info.append({
+                    'session_id': session_data.get('session_id'),
                     'date': session_data.get('date'),
+                    'time': session_data.get('time', ''),
                     'timestamp': session_data.get('timestamp'),
-                    'total_pnl': session_data.get('total_pnl', 0),
-                    'total_trades': session_data.get('total_trades', 0),
-                    'win_rate': session_data.get('win_rate', 0),
-                    'wins': session_data.get('wins', 0),
-                    'losses': session_data.get('losses', 0)
+                    'total_pnl': session_trades_pnl,  # ✅ Recalculé
+                    'total_trades': session_total,     # ✅ Recalculé
+                    'wins': session_wins,               # ✅ Recalculé
+                    'losses': session_losses,           # ✅ Recalculé
+                    'win_rate': session_win_rate        # ✅ Recalculé
                 })
         except Exception as e:
             st.warning(f"⚠️ Erreur chargement {session_file.name}: {e}")
@@ -170,6 +186,17 @@ if 'timestamp_close' in df_filtered.columns:
 # --- Dashboard Principal ---
 st.title("📈 ROYCE ROLLS | DASHBOARD XAUUSD")
 
+# 🔍 DEBUG: Afficher les informations de filtrage
+if len(df_filtered) == 0 and len(df_trades) > 0:
+    st.warning(f"⚠️ Filtre actif: **{time_filter}** - Aucun trade trouvé pour cette période")
+    
+    # Afficher la période des données disponibles
+    if 'timestamp_close' in df_trades.columns:
+        min_date = df_trades['timestamp_close'].min()
+        max_date = df_trades['timestamp_close'].max()
+        st.info(f"📅 Données disponibles du {min_date.strftime('%Y-%m-%d')} au {max_date.strftime('%Y-%m-%d')}")
+        st.info(f"📅 Filtre cherche: {datetime.now().strftime('%Y-%m-%d') if time_filter == 'Jour' else time_filter}")
+
 # Métriques globales
 col1, col2, col3, col4 = st.columns(4)
 
@@ -230,14 +257,152 @@ st.subheader("📊 Performance par Session")
 
 if not df_sessions.empty:
     df_sessions_display = df_sessions.sort_values('date', ascending=False).copy()
+    
+    # Ajouter la colonne time si disponible
+    if 'time' in df_sessions_display.columns:
+        df_sessions_display['Date/Heure'] = df_sessions_display['date'] + ' ' + df_sessions_display['time']
+    else:
+        df_sessions_display['Date/Heure'] = df_sessions_display['date']
+    
+    # Formatter les colonnes
     df_sessions_display['PNL'] = df_sessions_display['total_pnl'].apply(lambda x: f"{x:+.2f} €")
     df_sessions_display['Win Rate'] = df_sessions_display['win_rate'].apply(lambda x: f"{x:.1f}%")
+    df_sessions_display['Trades'] = df_sessions_display['total_trades'].astype(int)
+    df_sessions_display['Wins'] = df_sessions_display['wins'].astype(int)
+    df_sessions_display['Losses'] = df_sessions_display['losses'].astype(int)
+    
+    # Sélectionner les colonnes à afficher
+    display_columns = ['Date/Heure', 'Trades', 'Wins', 'Losses', 'Win Rate', 'PNL']
     
     st.dataframe(
-        df_sessions_display[['date', 'total_trades', 'wins', 'losses', 'Win Rate', 'PNL']],
+        df_sessions_display[display_columns],
         use_container_width=True,
         hide_index=True
     )
+    
+    # Ajouter un résumé global
+    st.markdown("---")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        total_sessions = len(df_sessions)
+        st.metric("📅 Sessions", total_sessions)
+    with col2:
+        profitable_sessions = len(df_sessions[df_sessions['total_pnl'] > 0])
+        st.metric("🟢 Sessions Profitables", f"{profitable_sessions}/{total_sessions}")
+    with col3:
+        total_session_pnl = df_sessions['total_pnl'].sum()
+        st.metric("💰 PNL Total Sessions", f"{total_session_pnl:+.2f} €")
+    with col4:
+        avg_session_pnl = df_sessions['total_pnl'].mean()
+        st.metric("📊 PNL Moyen/Session", f"{avg_session_pnl:+.2f} €")
+
+# 📅 CALENDRIER VISUEL - Jour Rouge/Vert
+st.markdown("---")
+st.subheader("📅 Calendrier des Performances")
+
+if 'timestamp_close' in df_trades.columns and 'profit' in df_trades.columns:
+    # Calculer PnL par jour
+    df_daily = df_trades.copy()
+    df_daily['date'] = df_daily['timestamp_close'].dt.date
+    daily_pnl = df_daily.groupby('date')['profit'].sum().reset_index()
+    daily_pnl.columns = ['date', 'pnl']
+    daily_pnl['date'] = pd.to_datetime(daily_pnl['date'])
+    
+    # Préparer les données pour le calendrier
+    daily_pnl['month'] = daily_pnl['date'].dt.strftime('%Y-%m')
+    daily_pnl['day'] = daily_pnl['date'].dt.day
+    daily_pnl['weekday'] = daily_pnl['date'].dt.day_name()
+    daily_pnl['color'] = daily_pnl['pnl'].apply(lambda x: 'green' if x > 0 else 'red')
+    
+    # Créer le graphique calendrier
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### 📆 Jours")
+        
+        # Heatmap des jours
+        fig_days = go.Figure(data=go.Heatmap(
+            x=daily_pnl['date'],
+            y=['PNL'],
+            z=[daily_pnl['pnl']],
+            colorscale=[
+                [0, '#FF4444'],      # Rouge foncé pour pertes
+                [0.5, '#FFFFFF'],    # Blanc pour 0
+                [1, '#44FF44']       # Vert foncé pour gains
+            ],
+            text=daily_pnl['pnl'].apply(lambda x: f"{x:+.0f}€"),
+            texttemplate='%{text}',
+            textfont={"size": 10},
+            hovertemplate='Date: %{x}<br>PNL: %{z:.2f}€<extra></extra>',
+            zmid=0
+        ))
+        
+        fig_days.update_layout(
+            height=150,
+            margin=dict(l=40, r=40, t=20, b=40),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(color='#000000')
+        )
+        
+        st.plotly_chart(fig_days, use_container_width=True)
+        
+        # Statistiques jours
+        green_days = len(daily_pnl[daily_pnl['pnl'] > 0])
+        red_days = len(daily_pnl[daily_pnl['pnl'] < 0])
+        
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric("🟢 Jours Verts", green_days)
+        with col_stat2:
+            st.metric("🔴 Jours Rouges", red_days)
+    
+    with col2:
+        st.markdown("### 📊 Semaines")
+        
+        # Calculer PnL par semaine
+        df_weekly = df_trades.copy()
+        df_weekly['week'] = df_weekly['timestamp_close'].dt.to_period('W').astype(str)
+        weekly_pnl = df_weekly.groupby('week')['profit'].sum().reset_index()
+        weekly_pnl.columns = ['week', 'pnl']
+        weekly_pnl['color'] = weekly_pnl['pnl'].apply(lambda x: 'green' if x > 0 else 'red')
+        
+        # Heatmap des semaines
+        fig_weeks = go.Figure(data=go.Heatmap(
+            x=weekly_pnl['week'],
+            y=['PNL'],
+            z=[weekly_pnl['pnl']],
+            colorscale=[
+                [0, '#FF4444'],
+                [0.5, '#FFFFFF'],
+                [1, '#44FF44']
+            ],
+            text=weekly_pnl['pnl'].apply(lambda x: f"{x:+.0f}€"),
+            texttemplate='%{text}',
+            textfont={"size": 10},
+            hovertemplate='Semaine: %{x}<br>PNL: %{z:.2f}€<extra></extra>',
+            zmid=0
+        ))
+        
+        fig_weeks.update_layout(
+            height=150,
+            margin=dict(l=40, r=40, t=20, b=40),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(color='#000000')
+        )
+        
+        st.plotly_chart(fig_weeks, use_container_width=True)
+        
+        # Statistiques semaines
+        green_weeks = len(weekly_pnl[weekly_pnl['pnl'] > 0])
+        red_weeks = len(weekly_pnl[weekly_pnl['pnl'] < 0])
+        
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric("🟢 Semaines Vertes", green_weeks)
+        with col_stat2:
+            st.metric("🔴 Semaines Rouges", red_weeks)
 
 # Tableau des derniers trades
 st.markdown("---")
