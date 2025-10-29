@@ -164,7 +164,7 @@ st.sidebar.header("🔍 Filtres")
 
 time_filter = st.sidebar.radio(
     "Période",
-    ["Tout", "Jour", "Semaine", "Mois", "Année", "Personnalisé"],
+    ["Tout", "Jour (24h)", "Semaine (7j)", "Mois (30j)", "Année (365j)", "Personnalisé"],
     horizontal=False
 )
 
@@ -172,16 +172,20 @@ time_filter = st.sidebar.radio(
 df_filtered = df_trades.copy()
 
 if not df_filtered.empty and 'timestamp_close' in df_filtered.columns:
-    if time_filter == "Jour":
-        today = datetime.now().date()
-        df_filtered = df_filtered[df_filtered['timestamp_close'].dt.date == today]
-    elif time_filter == "Semaine":
+    if time_filter == "Jour (24h)":
+        # Dernier jour = dernières 24 heures
+        last_24h = datetime.now() - timedelta(days=1)
+        df_filtered = df_filtered[df_filtered['timestamp_close'] >= last_24h]
+    elif time_filter == "Semaine (7j)":
+        # 7 derniers jours
         week_ago = datetime.now() - timedelta(days=7)
         df_filtered = df_filtered[df_filtered['timestamp_close'] >= week_ago]
-    elif time_filter == "Mois":
+    elif time_filter == "Mois (30j)":
+        # 30 derniers jours
         month_ago = datetime.now() - timedelta(days=30)
         df_filtered = df_filtered[df_filtered['timestamp_close'] >= month_ago]
-    elif time_filter == "Année":
+    elif time_filter == "Année (365j)":
+        # 365 derniers jours
         year_ago = datetime.now() - timedelta(days=365)
         df_filtered = df_filtered[df_filtered['timestamp_close'] >= year_ago]
     elif time_filter == "Personnalisé":
@@ -206,7 +210,20 @@ if len(df_filtered) == 0 and len(df_trades) > 0:
         min_date = df_trades['timestamp_close'].min()
         max_date = df_trades['timestamp_close'].max()
         st.info(f"📅 Données disponibles du {min_date.strftime('%Y-%m-%d')} au {max_date.strftime('%Y-%m-%d')}")
-        st.info(f"📅 Filtre cherche: {datetime.now().strftime('%Y-%m-%d') if time_filter == 'Jour' else time_filter}")
+        
+        # Afficher la période recherchée
+        if time_filter == "Jour (24h)":
+            search_period = f"Dernières 24h depuis {(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d %H:%M')}"
+        elif time_filter == "Semaine (7j)":
+            search_period = f"7 derniers jours depuis {(datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')}"
+        elif time_filter == "Mois (30j)":
+            search_period = f"30 derniers jours depuis {(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')}"
+        elif time_filter == "Année (365j)":
+            search_period = f"365 derniers jours depuis {(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')}"
+        else:
+            search_period = time_filter
+        
+        st.info(f"📅 Filtre cherche: {search_period}")
 
 # ════════════════════════════════════════════════════════════════
 # MÉTRIQUES - SELON LA PÉRIODE SÉLECTIONNÉE
