@@ -308,22 +308,6 @@ if not df_sessions.empty:
         use_container_width=True,
         hide_index=True
     )
-    
-    # Ajouter un résumé global
-    st.markdown("---")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        total_sessions = len(df_sessions)
-        st.metric("📅 Sessions", total_sessions)
-    with col2:
-        profitable_sessions = len(df_sessions[df_sessions['total_pnl'] > 0])
-        st.metric("🟢 Sessions Profitables", f"{profitable_sessions}/{total_sessions}")
-    with col3:
-        total_session_pnl = df_sessions['total_pnl'].sum()
-        st.metric("💰 PNL Total Sessions", f"{total_session_pnl:+.2f} €")
-    with col4:
-        avg_session_pnl = df_sessions['total_pnl'].mean()
-        st.metric("📊 PNL Moyen/Session", f"{avg_session_pnl:+.2f} €")
 
 # 📅 CALENDRIER VISUEL - Jour Rouge/Vert
 st.markdown("---")
@@ -432,6 +416,106 @@ if 'timestamp_close' in df_trades.columns and 'profit' in df_trades.columns:
             st.metric("🟢 Semaines Vertes", green_weeks)
         with col_stat2:
             st.metric("🔴 Semaines Rouges", red_weeks)
+    
+    # ═══════════════════════════════════════════════════════════════
+    # CALENDRIER MOIS ET ANNÉES
+    # ═══════════════════════════════════════════════════════════════
+    st.markdown("---")
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.markdown("### 📅 Mois")
+        
+        # Calculer PnL par mois
+        df_monthly = df_trades.copy()
+        df_monthly['month'] = df_monthly['timestamp_close'].dt.to_period('M').astype(str)
+        monthly_pnl = df_monthly.groupby('month')['profit'].sum().reset_index()
+        monthly_pnl.columns = ['month', 'pnl']
+        monthly_pnl['color'] = monthly_pnl['pnl'].apply(lambda x: 'green' if x > 0 else 'red')
+        
+        # Heatmap des mois
+        fig_months = go.Figure(data=go.Heatmap(
+            x=monthly_pnl['month'],
+            y=['PNL'],
+            z=[monthly_pnl['pnl']],
+            colorscale=[
+                [0, '#FF4444'],      # Rouge foncé pour pertes
+                [0.5, '#FFFFFF'],    # Blanc pour 0
+                [1, '#44FF44']       # Vert foncé pour gains
+            ],
+            text=monthly_pnl['pnl'].apply(lambda x: f"{x:+.0f}€"),
+            texttemplate='%{text}',
+            textfont={"size": 10},
+            hovertemplate='Mois: %{x}<br>PNL: %{z:.2f}€<extra></extra>',
+            zmid=0
+        ))
+        
+        fig_months.update_layout(
+            height=150,
+            margin=dict(l=40, r=40, t=20, b=40),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(color='#000000')
+        )
+        
+        st.plotly_chart(fig_months, use_container_width=True)
+        
+        # Statistiques mois
+        green_months = len(monthly_pnl[monthly_pnl['pnl'] > 0])
+        red_months = len(monthly_pnl[monthly_pnl['pnl'] < 0])
+        
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric("🟢 Mois Verts", green_months)
+        with col_stat2:
+            st.metric("🔴 Mois Rouges", red_months)
+    
+    with col4:
+        st.markdown("### 📆 Années")
+        
+        # Calculer PnL par année
+        df_yearly = df_trades.copy()
+        df_yearly['year'] = df_yearly['timestamp_close'].dt.year.astype(str)
+        yearly_pnl = df_yearly.groupby('year')['profit'].sum().reset_index()
+        yearly_pnl.columns = ['year', 'pnl']
+        yearly_pnl['color'] = yearly_pnl['pnl'].apply(lambda x: 'green' if x > 0 else 'red')
+        
+        # Heatmap des années
+        fig_years = go.Figure(data=go.Heatmap(
+            x=yearly_pnl['year'],
+            y=['PNL'],
+            z=[yearly_pnl['pnl']],
+            colorscale=[
+                [0, '#FF4444'],      # Rouge foncé pour pertes
+                [0.5, '#FFFFFF'],    # Blanc pour 0
+                [1, '#44FF44']       # Vert foncé pour gains
+            ],
+            text=yearly_pnl['pnl'].apply(lambda x: f"{x:+.0f}€"),
+            texttemplate='%{text}',
+            textfont={"size": 12},
+            hovertemplate='Année: %{x}<br>PNL: %{z:.2f}€<extra></extra>',
+            zmid=0
+        ))
+        
+        fig_years.update_layout(
+            height=150,
+            margin=dict(l=40, r=40, t=20, b=40),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(color='#000000')
+        )
+        
+        st.plotly_chart(fig_years, use_container_width=True)
+        
+        # Statistiques années
+        green_years = len(yearly_pnl[yearly_pnl['pnl'] > 0])
+        red_years = len(yearly_pnl[yearly_pnl['pnl'] < 0])
+        
+        col_stat1, col_stat2 = st.columns(2)
+        with col_stat1:
+            st.metric("🟢 Années Vertes", green_years)
+        with col_stat2:
+            st.metric("🔴 Années Rouges", red_years)
 
 # Tableau des derniers trades
 st.markdown("---")
