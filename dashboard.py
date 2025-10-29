@@ -208,26 +208,30 @@ if len(df_filtered) == 0 and len(df_trades) > 0:
         st.info(f"📅 Données disponibles du {min_date.strftime('%Y-%m-%d')} au {max_date.strftime('%Y-%m-%d')}")
         st.info(f"📅 Filtre cherche: {datetime.now().strftime('%Y-%m-%d') if time_filter == 'Jour' else time_filter}")
 
-# Métriques globales
+# ════════════════════════════════════════════════════════════════
+# MÉTRIQUES GLOBALES - TOUJOURS SUR TOUTES LES DONNÉES
+# ════════════════════════════════════════════════════════════════
+st.subheader("📊 Performance Globale (Toutes Sessions)")
+
 col1, col2, col3, col4 = st.columns(4)
 
-# ✅ Calculer avec vérifications robustes
-if not df_filtered.empty and 'profit' in df_filtered.columns:
-    total_pnl = df_filtered['profit'].sum()
+# ✅ Utiliser df_trades (TOUTES les données) au lieu de df_filtered
+if not df_trades.empty and 'profit' in df_trades.columns:
+    total_pnl = float(df_trades['profit'].sum())
 else:
     total_pnl = 0
 
-total_trades = len(df_filtered) if not df_filtered.empty else 0
+total_trades = len(df_trades) if not df_trades.empty else 0
 
-if not df_filtered.empty and 'result' in df_filtered.columns:
-    wins = len(df_filtered[df_filtered['result'] == 'WIN'])
+if not df_trades.empty and 'result' in df_trades.columns:
+    wins = len(df_trades[df_trades['result'] == 'WIN'])
 else:
     wins = 0
 
 win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
 
-if not df_filtered.empty and 'profit' in df_filtered.columns and 'result' in df_filtered.columns and wins > 0:
-    avg_profit = df_filtered[df_filtered['result'] == 'WIN']['profit'].mean()
+if not df_trades.empty and 'profit' in df_trades.columns and 'result' in df_trades.columns and wins > 0:
+    avg_profit = float(df_trades[df_trades['result'] == 'WIN']['profit'].mean())
 else:
     avg_profit = 0
 

@@ -1,0 +1,163 @@
+{
+  "session_id": "20251027_223648",
+  "date": "2025-10-27",
+  "time": "22:36:48",
+  "timestamp": "20251027_223648",
+  "total_pnl": 62,
+  "total_trades": 15,
+  "wins": 7,
+  "losses": 8,
+  "win_rate": 46.67,
+  "trades": [
+    {
+      "trade_id": 10200,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": -14,
+      "result": "LOSS",
+      "confidence": 75.8,
+      "timestamp_open": "2025-10-27T22:34:48.286689",
+      "timestamp_close": "2025-10-27T22:36:48.286689"
+    },
+    {
+      "trade_id": 10201,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": 18,
+      "result": "WIN",
+      "confidence": 83.9,
+      "timestamp_open": "2025-10-27T22:29:48.286689",
+      "timestamp_close": "2025-10-27T22:31:48.286689"
+    },
+    {
+      "trade_id": 10202,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": -19,
+      "result": "LOSS",
+      "confidence": 79.1,
+      "timestamp_open": "2025-10-27T22:24:48.286689",
+      "timestamp_close": "2025-10-27T22:26:48.286689"
+    },
+    {
+      "trade_id": 10203,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": -21,
+      "result": "LOSS",
+      "confidence": 84.6,
+      "timestamp_open": "2025-10-27T22:19:48.286689",
+      "timestamp_close": "2025-10-27T22:21:48.286689"
+    },
+    {
+      "trade_id": 10204,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": 37,
+      "result": "WIN",
+      "confidence": 79.1,
+      "timestamp_open": "2025-10-27T22:14:48.286689",
+      "timestamp_close": "2025-10-27T22:16:48.286689"
+    },
+    {
+      "trade_id": 10205,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": 41,
+      "result": "WIN",
+      "confidence": 82.2,
+      "timestamp_open": "2025-10-27T22:09:48.286689",
+      "timestamp_close": "2025-10-27T22:11:48.286689"
+    },
+    {
+      "trade_id": 10206,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": -29,
+      "result": "LOSS",
+      "confidence": 82.7,
+      "timestamp_open": "2025-10-27T22:04:48.286689",
+      "timestamp_close": "2025-10-27T22:06:48.286689"
+    },
+    {
+      "trade_id": 10207,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": -17,
+      "result": "LOSS",
+      "confidence": 79.1,
+      "timestamp_open": "2025-10-27T21:59:48.286689",
+      "timestamp_close": "2025-10-27T22:01:48.286689"
+    },
+    {
+      "trade_id": 10208,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": 38,
+      "result": "WIN",
+      "confidence": 75.1,
+      "timestamp_open": "2025-10-27T21:54:48.286689",
+      "timestamp_close": "2025-10-27T21:56:48.286689"
+    },
+    {
+      "trade_id": 10209,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": -17,
+      "result": "LOSS",
+      "confidence": 79.3,
+      "timestamp_open": "2025-10-27T21:49:48.286689",
+      "timestamp_close": "2025-10-27T21:51:48.286689"
+    },
+    {
+      "trade_id": 10210,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": 22,
+      "result": "WIN",
+      "confidence": 82.5,
+      "timestamp_open": "2025-10-27T21:44:48.286689",
+      "timestamp_close": "2025-10-27T21:46:48.286689"
+    },
+    {
+      "trade_id": 10211,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": -15,
+      "result": "LOSS",
+      "confidence": 69.6,
+      "timestamp_open": "2025-10-27T21:39:48.286689",
+      "timestamp_close": "2025-10-27T21:41:48.286689"
+    },
+    {
+      "trade_id": 10212,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": -30,
+      "result": "LOSS",
+      "confidence": 72.0,
+      "timestamp_open": "2025-10-27T21:34:48.286689",
+      "timestamp_close": "2025-10-27T21:36:48.286689"
+    },
+    {
+      "trade_id": 10213,
+      "mt5_instance": "mt5-02",
+      "direction": "SELL",
+      "profit": 29,
+      "result": "WIN",
+      "confidence": 84.3,
+      "timestamp_open": "2025-10-27T21:29:48.286689",
+      "timestamp_close": "2025-10-27T21:31:48.286689"
+    },
+    {
+      "trade_id": 10214,
+      "mt5_instance": "mt5-01",
+      "direction": "BUY",
+      "profit": 39,
+      "result": "WIN",
+      "confidence": 65.2,
+      "timestamp_open": "2025-10-27T21:24:48.286689",
+      "timestamp_close": "2025-10-27T21:26:48.286689"
+    }
+  ]
+}
