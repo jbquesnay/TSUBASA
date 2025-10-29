@@ -143,11 +143,20 @@ if not all_trades:
 df_trades = pd.DataFrame(all_trades)
 df_sessions = pd.DataFrame(sessions_info)
 
-# Convertir les timestamps
+# Convertir les timestamps avec gestion d'erreurs
 if 'timestamp_close' in df_trades.columns:
-    df_trades['timestamp_close'] = pd.to_datetime(df_trades['timestamp_close'])
+    try:
+        df_trades['timestamp_close'] = pd.to_datetime(df_trades['timestamp_close'], errors='coerce')
+        # Supprimer les lignes avec des timestamps invalides
+        df_trades = df_trades.dropna(subset=['timestamp_close'])
+    except Exception as e:
+        st.error(f"❌ Erreur conversion timestamp_close: {e}")
+        
 if 'timestamp_open' in df_trades.columns:
-    df_trades['timestamp_open'] = pd.to_datetime(df_trades['timestamp_open'])
+    try:
+        df_trades['timestamp_open'] = pd.to_datetime(df_trades['timestamp_open'], errors='coerce')
+    except Exception as e:
+        st.warning(f"⚠️ Erreur conversion timestamp_open: {e}")
 
 # --- Filtres ---
 st.sidebar.markdown("---")
