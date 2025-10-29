@@ -14,7 +14,3 @@ cookie:
   key: royce_rolls_secret_key_2024_secure_random_string
   expiry_days: 30
 
-preauthorized:
-  emails:
-    - jbquesnay@gmail.com
-

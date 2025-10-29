@@ -147,9 +147,6 @@ def load_config():
                 'name': 'royce_rolls_dashboard',
                 'key': 'royce_rolls_secret_key_2024',
                 'expiry_days': 30
-            },
-            'preauthorized': {
-                'emails': ['jbquesnay@gmail.com']
             }
         }
         with open('config.yaml', 'w') as f:
@@ -165,8 +162,7 @@ authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
+    config['cookie']['expiry_days']
 )
 
 # --- Page de Login ---
