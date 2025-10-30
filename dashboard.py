@@ -147,7 +147,8 @@ if st.sidebar.button("🔄 Actualiser"):
 # --- Chargement des Données ---
 all_trades, sessions_info = load_all_sessions()
 
-if not all_trades:
+# Vérifier si on a des sessions (même vides)
+if not sessions_info:
     st.warning("⚠️ Aucune session trouvée")
     
     # Afficher le chemin de recherche
@@ -168,6 +169,34 @@ if not all_trades:
     st.markdown("1. Les fichiers `session_*.json` doivent être dans `/dashboard/`")
     st.markdown("2. Exécutez `python export_dashboard.py` à la fin d'une session")
     st.markdown("3. Uploadez les fichiers sur GitHub: `cd dashboard && git push origin main`")
+    st.stop()
+
+# Si on a des sessions mais aucun trade
+if not all_trades and sessions_info:
+    st.info("ℹ️ Sessions trouvées mais aucun trade enregistré")
+    st.markdown("Les sessions sont vides. Attendez que le bot effectue des trades.")
+    
+    # Afficher quand même les sessions vides
+    df_sessions = pd.DataFrame(sessions_info)
+    
+    st.subheader("📋 Sessions enregistrées (vides)")
+    if not df_sessions.empty:
+        # Formatter
+        if 'time' in df_sessions.columns:
+            df_sessions['Date/Heure'] = df_sessions['date'] + ' ' + df_sessions['time']
+        else:
+            df_sessions['Date/Heure'] = df_sessions['date']
+        
+        df_sessions['PNL'] = df_sessions['total_pnl'].apply(lambda x: f"{x:+.2f} €")
+        df_sessions['Trades'] = df_sessions['total_trades'].astype(int)
+        
+        display_columns = ['Date/Heure', 'Trades', 'PNL']
+        st.dataframe(
+            df_sessions[display_columns],
+            use_container_width=True,
+            hide_index=True
+        )
+    
     st.stop()
 
 # Conversion en DataFrame
