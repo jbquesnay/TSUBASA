@@ -74,8 +74,21 @@ def load_all_sessions():
     all_trades = []
     sessions_info = []
     
-    # Charger tous les fichiers session_*.json
-    session_files = sorted(Path('.').glob('session_*.json'))
+    # Obtenir le répertoire du script (dashboard/)
+    dashboard_dir = Path(__file__).parent
+    
+    # Charger tous les fichiers session_*.json dans le dossier dashboard
+    session_files = sorted(dashboard_dir.glob('session_*.json'))
+    
+    if not session_files:
+        # Fallback : chercher dans le répertoire courant
+        session_files = sorted(Path('.').glob('session_*.json'))
+    
+    # Debug : afficher le nombre de fichiers trouvés
+    if session_files:
+        # Lire un fichier pour debug
+        print(f"[DEBUG] {len(session_files)} fichier(s) session trouvé(s)")
+        print(f"[DEBUG] Premier fichier: {session_files[0] if session_files else 'aucun'}")
     
     for session_file in session_files:
         try:
@@ -136,7 +149,25 @@ all_trades, sessions_info = load_all_sessions()
 
 if not all_trades:
     st.warning("⚠️ Aucune session trouvée")
-    st.info("Les fichiers session_*.json doivent être dans le même dossier que dashboard.py")
+    
+    # Afficher le chemin de recherche
+    dashboard_dir = Path(__file__).parent
+    st.info(f"📁 Recherche dans: {dashboard_dir.absolute()}")
+    
+    # Lister les fichiers présents
+    all_files = list(dashboard_dir.glob('*'))
+    if all_files:
+        st.info(f"📄 Fichiers trouvés dans le dossier ({len(all_files)}):")
+        for f in all_files[:10]:  # Afficher les 10 premiers
+            st.write(f"  - {f.name}")
+    else:
+        st.warning("⚠️ Le dossier est vide")
+    
+    st.markdown("---")
+    st.markdown("**💡 Solution:**")
+    st.markdown("1. Les fichiers `session_*.json` doivent être dans `/dashboard/`")
+    st.markdown("2. Exécutez `python export_dashboard.py` à la fin d'une session")
+    st.markdown("3. Uploadez les fichiers sur GitHub: `cd dashboard && git push origin main`")
     st.stop()
 
 # Conversion en DataFrame
